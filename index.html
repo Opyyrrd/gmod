@@ -3,262 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <title>IcyUniverse Loading</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@300;500&display=swap" rel="stylesheet">
     <style>
         :root {
             --main-blue: #00a0ff;
-            --bg-dark: #0a0c12;
-            --panel-bg: rgba(15, 17, 24, 0.85);
-            --accent-glow: rgba(0, 160, 255, 0.3);
+            --deep-cyan: #00ffd5;
+            --bg-dark: #05070a;
+            --panel-bg: rgba(10, 15, 25, 0.7);
+            --glass-border: rgba(0, 160, 255, 0.3);
         }
 
         body, html {
             margin: 0; padding: 0;
             height: 100%; width: 100%;
             background-color: var(--bg-dark);
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Roboto Mono', monospace;
             color: white;
             overflow: hidden;
             user-select: none;
         }
 
-        /* Animated Background Layer */
-        #bg-container {
-            position: fixed;
-            width: 100%; height: 100%;
-            z-index: 0;
-        }
-
-        .bg-slide {
+        /* Scanline Effect Over Everything */
+        body::after {
+            content: " ";
+            display: block;
             position: absolute;
-            width: 110%; height: 110%;
-            background-size: cover;
-            background-position: center;
-            filter: brightness(0.4) blur(2px);
-            opacity: 0;
-            transition: opacity 2s ease-in-out;
-            animation: pan 30s infinite alternate linear;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 10;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
         }
 
+        /* Background Layers */
+        #bg-container { position: fixed; width: 100%; height: 100%; z-index: 0; }
+        .bg-slide {
+            position: absolute; width: 110%; height: 110%;
+            background-size: cover; background-position: center;
+            filter: brightness(0.3) contrast(1.2) saturate(0.8);
+            opacity: 0; transition: opacity 2.5s ease;
+            animation: pan 40s infinite alternate linear;
+        }
         .bg-slide.active { opacity: 1; }
 
         @keyframes pan {
-            from { transform: scale(1) translate(0, 0); }
-            to { transform: scale(1.1) translate(-2%, -2%); }
+            from { transform: translate(0, 0) scale(1); }
+            to { transform: translate(-3%, -3%) scale(1.1); }
         }
 
-        .overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: radial-gradient(circle at center, transparent 10%, rgba(10, 12, 18, 0.9) 90%);
+        .vignette {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, transparent 20%, black 110%);
             z-index: 1;
         }
 
-        /* Top Bar: User Info */
+        /* Top Left Header */
         .top-bar {
-            position: absolute;
-            top: 30px; left: 50px;
-            display: flex;
-            align-items: center;
-            z-index: 5;
+            position: absolute; top: 40px; left: 50px;
+            display: flex; align-items: center; z-index: 5;
+            background: var(--panel-bg);
+            padding: 10px 25px 10px 10px;
+            border-radius: 50px 10px 10px 50px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
         }
 
         #avatar {
-            width: 60px; height: 60px;
-            border-radius: 50%;
+            width: 55px; height: 55px; border-radius: 50%;
             border: 2px solid var(--main-blue);
             box-shadow: 0 0 15px var(--main-blue);
-            margin-right: 15px;
         }
 
-        .user-meta h2 {
-            margin: 0; font-family: 'Orbitron'; font-size: 18px; color: var(--main-blue);
-        }
+        .user-meta { margin-left: 15px; }
+        .user-meta h2 { margin: 0; font-family: 'Orbitron'; font-size: 14px; letter-spacing: 2px; color: var(--main-blue); }
+        .user-meta small { color: var(--deep-cyan); opacity: 0.8; font-size: 10px; }
 
-        /* Main Center Title */
+        /* Centered Branding with Glitch */
         .center-brand {
-            position: absolute;
-            top: 45%; left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            z-index: 5;
+            position: absolute; top: 45%; left: 50%;
+            transform: translate(-50%, -50%); text-align: center; z-index: 5;
         }
 
         .server-title {
             font-family: 'Orbitron', sans-serif;
-            font-size: 80px;
-            font-weight: 700;
-            letter-spacing: 15px;
-            text-shadow: 0 0 30px var(--main-blue);
-            margin: 0;
-            animation: pulse 4s infinite ease-in-out;
+            font-size: 95px; font-weight: 900;
+            letter-spacing: 25px;
+            color: white;
+            text-transform: uppercase;
+            position: relative;
+            text-shadow: 0.05em 0 0 rgba(255,0,0,0.75), -0.025em -0.05em 0 rgba(0,255,0,0.75), 0.025em 0.05em 0 rgba(0,0,255,0.75);
+            animation: glitch 500ms infinite;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 0.8; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.02); }
+        @keyframes glitch {
+            0% { text-shadow: 0.05em 0 0 rgba(255,0,0,0.75), -0.05em -0.025em 0 rgba(0,255,0,0.75), -0.025em 0.05em 0 rgba(0,0,255,0.75); }
+            14% { text-shadow: 0.05em 0 0 rgba(255,0,0,0.75), -0.05em -0.025em 0 rgba(0,255,0,0.75), -0.025em 0.05em 0 rgba(0,0,255,0.75); }
+            15% { text-shadow: -0.05em -0.025em 0 rgba(255,0,0,0.75), 0.025em 0.025em 0 rgba(0,255,0,0.75), -0.05em -0.05em 0 rgba(0,0,255,0.75); }
+            49% { text-shadow: -0.05em -0.025em 0 rgba(255,0,0,0.75), 0.025em 0.025em 0 rgba(0,255,0,0.75), -0.05em -0.05em 0 rgba(0,0,255,0.75); }
+            50% { text-shadow: 0.025em 0.05em 0 rgba(255,0,0,0.75), 0.05em 0 0 rgba(0,255,0,0.75), 0 -0.05em 0 rgba(0,0,255,0.75); }
+            99% { text-shadow: 0.025em 0.05em 0 rgba(255,0,0,0.75), 0.05em 0 0 rgba(0,255,0,0.75), 0 -0.05em 0 rgba(0,0,255,0.75); }
+            100% { text-shadow: -0.025em 0 0 rgba(255,0,0,0.75), -0.025em -0.025em 0 rgba(0,255,0,0.75), -0.025em -0.05em 0 rgba(0,0,255,0.75); }
         }
 
-        /* Lower Progress Area */
+        /* Bottom Status Area */
         .bottom-area {
-            position: absolute;
-            bottom: 50px; left: 50%;
-            transform: translateX(-50%);
-            width: 60%;
-            text-align: center;
-            z-index: 5;
+            position: absolute; bottom: 60px; left: 50%;
+            transform: translateX(-50%); width: 50%; z-index: 5;
         }
 
-        #tip-text {
-            font-size: 14px;
-            color: #aaa;
-            margin-bottom: 15px;
-            font-style: italic;
-            height: 20px;
+        .status-container {
+            background: var(--panel-bg);
+            border: 1px solid var(--glass-border);
+            padding: 15px; border-radius: 4px;
+            backdrop-filter: blur(5px);
         }
 
-        .bar-container {
-            width: 100%; height: 6px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
-            overflow: hidden;
-            border: 1px solid rgba(0,160,255,0.2);
+        #tip-text { color: var(--deep-cyan); font-size: 11px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+
+        .progress-rail {
+            width: 100%; height: 4px; background: rgba(255,255,255,0.1);
+            position: relative; overflow: hidden;
         }
 
         #progress-bar {
-            width: 0%; height: 100%;
-            background: linear-gradient(90deg, #005f99, var(--main-blue));
-            box-shadow: 0 0 15px var(--main-blue);
-            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 0%; height: 100%; background: var(--main-blue);
+            box-shadow: 0 0 20px var(--main-blue); transition: width 0.4s ease;
         }
 
-        #status-text {
-            display: block;
-            margin-top: 10px;
-            font-size: 12px;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            color: var(--main-blue);
+        /* Side Info Panels */
+        .side-panel {
+            position: absolute; right: 50px; top: 50%; transform: translateY(-50%);
+            width: 260px; z-index: 5;
         }
 
-        /* Rules Card */
-        .news-box {
-            position: absolute;
-            right: 50px; bottom: 50px;
+        .glass-card {
             background: var(--panel-bg);
-            padding: 25px;
-            border-radius: 8px;
-            width: 280px;
-            z-index: 5;
-            border-bottom: 3px solid var(--main-blue);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-left: 4px solid var(--main-blue);
+            padding: 20px; border-radius: 0 8px 8px 0;
+            backdrop-filter: blur(15px);
+            margin-bottom: 20px;
+            box-shadow: 20px 0 50px rgba(0,0,0,0.5);
         }
 
-        .news-box h3 {
-            margin: 0 0 15px 0;
-            font-family: 'Orbitron';
-            font-size: 16px;
-            color: var(--main-blue);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 10px;
-        }
-
-        .rule-item { font-size: 13px; margin-bottom: 10px; color: #ddd; display: flex; }
-        .rule-item span { color: var(--main-blue); margin-right: 10px; font-weight: bold; }
+        .glass-card h3 { font-family: 'Orbitron'; font-size: 14px; margin: 0 0 15px 0; color: var(--main-blue); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;}
+        .data-row { font-size: 12px; margin-bottom: 10px; color: #fff; display: flex; justify-content: space-between; }
+        .data-row span { color: var(--deep-cyan); }
 
     </style>
 </head>
 <body>
     <div id="bg-container">
-        <div class="bg-slide active" style="background-image: url('https://i.imgur.com/your_image1.jpg');"></div>
-        <div class="bg-slide" style="background-image: url('https://i.imgur.com/your_image2.jpg');"></div>
-        <div class="bg-slide" style="background-image: url('https://i.imgur.com/your_image3.jpg');"></div>
+        <div class="bg-slide active" style="background-image: url('https://i.imgur.com/your_img1.jpg');"></div>
+        <div class="bg-slide" style="background-image: url('https://i.imgur.com/your_img2.jpg');"></div>
     </div>
-    <div class="overlay"></div>
+    <div class="vignette"></div>
 
     <div class="top-bar">
-        <img id="avatar" src="https://i.imgur.com/6E7p7vC.png"> <div class="user-meta">
-            <h2 id="username">WELCOME PLAYER</h2>
-            <small style="opacity: 0.5" id="steamid">STEAM_0:0:000000</small>
+        <img id="avatar" src="https://i.imgur.com/6E7p7vC.png">
+        <div class="user-meta">
+            <h2 id="username">AUTH_USER: UNKNOWN</h2>
+            <small id="steamid">ID: STEAM_0:0:00000000</small>
         </div>
     </div>
 
     <div class="center-brand">
         <h1 class="server-title">ICYUNIVERSE</h1>
-        <p style="letter-spacing: 8px; color: #aaa;">SERIOUS ROLEPLAY</p>
+        <div style="height: 2px; background: var(--main-blue); width: 100%; margin-top: -15px; box-shadow: 0 0 15px var(--main-blue);"></div>
+        <p style="letter-spacing: 12px; font-size: 12px; color: var(--deep-cyan); margin-top: 10px; font-weight: bold;">NEURAL LINK ESTABLISHED</p>
+    </div>
+
+    <div class="side-panel">
+        <div class="glass-card">
+            <h3>SERVER_RULES</h3>
+            <div class="data-row">01. NO RDM <span>[LOCKED]</span></div>
+            <div class="data-row">02. NO PROP SPAM <span>[LOCKED]</span></div>
+            <div class="data-row">03. RESPECT STAFF <span>[LOCKED]</span></div>
+            <div class="data-row">04. USE MIC <span>[REQ]</span></div>
+        </div>
+        <div class="glass-card" style="border-left-color: var(--deep-cyan);">
+            <h3>SECTOR_INFO</h3>
+            <div class="data-row">MAP: <span id="mapname">LOADING...</span></div>
+            <div class="data-row">MODE: <span>DARKRP</span></div>
+        </div>
     </div>
 
     <div class="bottom-area">
-        <div id="tip-text">Press F2 to open the Door Menu once in-game.</div>
-        <div class="bar-container">
-            <div id="progress-bar"></div>
+        <div class="status-container">
+            <div id="tip-text">SYNCING ASSETS...</div>
+            <div class="progress-rail">
+                <div id="progress-bar"></div>
+            </div>
+            <div id="status-text" style="font-size: 9px; margin-top: 8px; color: #666; letter-spacing: 2px;">CONNECTION STABLE // PORT: 27015</div>
         </div>
-        <span id="status-text">INITIALIZING QUANTUM LINK...</span>
-    </div>
-
-    <div class="news-box">
-        <h3>PROTOCOL</h3>
-        <div class="rule-item"><span>01</span> No RDM or Prop-Abuse</div>
-        <div class="rule-item"><span>02</span> Listen to Staff Instructions</div>
-        <div class="rule-item"><span>03</span> FailRP is not tolerated</div>
-        <div class="rule-item"><span>04</span> Use common sense</div>
     </div>
 
     <audio id="loading-music" loop>
-        <source src="your_music_link.mp3" type="audio/mpeg">
+        <source src="YOUR_MUSIC_LINK_HERE.mp3" type="audio/mpeg">
     </audio>
 
-    <script type="text/javascript">
-        // Background Cycling
+    <script>
+        // Smooth BG Transition
         let slides = document.querySelectorAll('.bg-slide');
-        let currentSlide = 0;
+        let current = 0;
         setInterval(() => {
-            slides[currentSlide].classList.remove('active');
-            currentSlide = (currentSlide + 1) % slides.length;
-            slides[currentSlide].classList.add('active');
-        }, 8000);
+            slides[current].classList.remove('active');
+            current = (current + 1) % slides.length;
+            slides[current].classList.add('active');
+        }, 10000);
 
-        // Tips Cycling
-        const tips = [
-            "Need help? Join our Discord community!",
-            "Type /givemoney to share your wealth.",
-            "Don't forget to buy a door using F2!",
-            "Admins are here to help, use @ to call them.",
-            "Be sure to read the full rules on our forums."
-        ];
-        let tipIndex = 0;
+        // Tips Logic
+        const tips = ["DON'T FEAR THE DARK.", "PRESS F2 TO BUY PROPERTY.", "JOIN THE DISCORD FOR PRIORITY.", "REVENUE IS EVERYTHING.", "TRUST NO ONE."];
+        let tIdx = 0;
         setInterval(() => {
-            tipIndex = (tipIndex + 1) % tips.length;
-            document.getElementById('tip-text').innerText = tips[tipIndex];
-        }, 5000);
+            tIdx = (tIdx + 1) % tips.length;
+            document.getElementById('tip-text').innerText = tips[tIdx];
+        }, 4000);
 
-        // GMod Data Integration
-        function GameDetails( servername, serverurl, mapname, maxplayers, steamid, gamemode, volume, language ) {
-            document.getElementById('steamid').innerText = steamid;
-            // Attempt to get avatar via Steam (needs a proxy or API usually, using fallback here)
-            // You can use a web API to get the name/avatar via steamid if server is set up
-            
+        // GMOD HOOKS
+        function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode, volume) {
+            document.getElementById('steamid').innerText = "ID: " + steamid;
+            document.getElementById('mapname').innerText = mapname.toUpperCase();
             let music = document.getElementById('loading-music');
-            music.volume = (volume / 100) * 0.5; // Set volume based on GMod settings
+            music.volume = (volume / 100) * 0.3;
             music.play();
         }
 
-        function SetStatusChanged(status) {
-            document.getElementById('status-text').innerText = status;
-        }
-
-        let totalFiles = 0;
-        function SetFilesTotal(total) {
-            totalFiles = total;
-        }
-
         function SetFilesNeeded(needed) {
-            if (totalFiles > 0) {
-                let percentage = Math.floor(((totalFiles - needed) / totalFiles) * 100);
-                document.getElementById('progress-bar').style.width = percentage + "%";
+            if (window.totalFiles > 0) {
+                let p = Math.floor(((window.totalFiles - needed) / window.totalFiles) * 100);
+                document.getElementById('progress-bar').style.width = p + "%";
             }
         }
+        function SetFilesTotal(total) { window.totalFiles = total; }
+        function SetStatusChanged(status) { document.getElementById('tip-text').innerText = status.toUpperCase(); }
     </script>
 </body>
 </html>
