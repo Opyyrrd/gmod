@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IcyUniverse Loading</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --main-blue: #00a0ff;
+            --bg-dark: #0a0c12;
+            --panel-bg: rgba(15, 17, 24, 0.9);
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            height: 100%; width: 100%;
+            background-color: var(--bg-dark);
+            font-family: 'Roboto', sans-serif;
+            color: white;
+            overflow: hidden;
+        }
+
+        /* Animated Background */
+        .overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(circle, transparent 20%, var(--bg-dark) 80%);
+            z-index: 1;
+        }
+
+        #bg-image {
+            position: fixed;
+            width: 110%; height: 110%;
+            background: url('https://i.imgur.com/your_cool_background.jpg') no-repeat center center;
+            background-size: cover;
+            filter: blur(4px);
+            animation: pan 20s infinite alternate linear;
+            z-index: 0;
+        }
+
+        @keyframes pan {
+            from { transform: scale(1) translate(0, 0); }
+            to { transform: scale(1.1) translate(-2%, -2%); }
+        }
+
+        /* Sidebar Info */
+        .sidebar {
+            position: absolute;
+            left: 50px; bottom: 50px;
+            width: 350px;
+            z-index: 2;
+            border-left: 3px solid var(--main-blue);
+            padding-left: 20px;
+        }
+
+        .server-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 42px;
+            letter-spacing: 5px;
+            text-shadow: 0 0 15px var(--main-blue);
+            margin: 0;
+        }
+
+        .status-container {
+            margin-top: 30px;
+        }
+
+        .bar-bg {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            margin-top: 10px;
+        }
+
+        #progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--main-blue);
+            box-shadow: 0 0 10px var(--main-blue);
+            transition: width 0.4s ease;
+        }
+
+        #status-text {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--main-blue);
+        }
+
+        /* Rules/News Box */
+        .news-box {
+            position: absolute;
+            right: 50px; top: 50px;
+            background: var(--panel-bg);
+            padding: 20px;
+            border-radius: 4px;
+            width: 300px;
+            z-index: 2;
+        }
+
+        .news-box h3 {
+            margin: 0 0 10px 0;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            color: var(--main-blue);
+        }
+
+        .rule-item {
+            font-size: 13px;
+            margin-bottom: 8px;
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div id="bg-image"></div>
+    <div class="overlay"></div>
+
+    <div class="sidebar">
+        <h1 class="server-title">ICYUNIVERSE</h1>
+        <div class="status-container">
+            <span id="status-text">Initializing connection...</span>
+            <div class="bar-bg">
+                <div id="progress-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="news-box">
+        <h3>SERVER RULES</h3>
+        <div class="rule-item">1. No RDM / No Prop Block</div>
+        <div class="rule-item">2. Respect all players & staff</div>
+        <div class="rule-item">3. Use Shift+E to manage inventory</div>
+        <div class="rule-item">4. Do not exploit physics bugs</div>
+    </div>
+
+    <script type="text/javascript">
+        // GMod communication functions
+        function SetStatusChanged(status) {
+            document.getElementById('status-text').innerText = status;
+        }
+
+        function SetFilesTotal(total) {
+            this.totalFiles = total;
+        }
+
+        function SetFilesNeeded(needed) {
+            var filesLeft = needed;
+            if (this.totalFiles > 0) {
+                var percentage = Math.floor(((this.totalFiles - filesLeft) / this.totalFiles) * 100);
+                document.getElementById('progress-bar').style.width = percentage + "%";
+            }
+        }
+    </script>
+</body>
+</html>
