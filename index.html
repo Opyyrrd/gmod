@@ -23,7 +23,7 @@
             user-select: none;
         }
 
-        /* Scanline Effect Over Everything */
+        /* Scanline Effect */
         body::after {
             content: " ";
             display: block;
@@ -57,7 +57,7 @@
             z-index: 1;
         }
 
-        /* Top Left Header */
+        /* Top Bar: Avatar & Identity */
         .top-bar {
             position: absolute; top: 40px; left: 50px;
             display: flex; align-items: center; z-index: 5;
@@ -72,16 +72,18 @@
             width: 55px; height: 55px; border-radius: 50%;
             border: 2px solid var(--main-blue);
             box-shadow: 0 0 15px var(--main-blue);
+            object-fit: cover;
         }
 
         .user-meta { margin-left: 15px; }
         .user-meta h2 { margin: 0; font-family: 'Orbitron'; font-size: 14px; letter-spacing: 2px; color: var(--main-blue); }
         .user-meta small { color: var(--deep-cyan); opacity: 0.8; font-size: 10px; }
 
-        /* Centered Branding with Glitch */
+        /* Branding */
         .center-brand {
             position: absolute; top: 45%; left: 50%;
             transform: translate(-50%, -50%); text-align: center; z-index: 5;
+            width: 100%;
         }
 
         .server-title {
@@ -97,15 +99,11 @@
 
         @keyframes glitch {
             0% { text-shadow: 0.05em 0 0 rgba(255,0,0,0.75), -0.05em -0.025em 0 rgba(0,255,0,0.75), -0.025em 0.05em 0 rgba(0,0,255,0.75); }
-            14% { text-shadow: 0.05em 0 0 rgba(255,0,0,0.75), -0.05em -0.025em 0 rgba(0,255,0,0.75), -0.025em 0.05em 0 rgba(0,0,255,0.75); }
-            15% { text-shadow: -0.05em -0.025em 0 rgba(255,0,0,0.75), 0.025em 0.025em 0 rgba(0,255,0,0.75), -0.05em -0.05em 0 rgba(0,0,255,0.75); }
-            49% { text-shadow: -0.05em -0.025em 0 rgba(255,0,0,0.75), 0.025em 0.025em 0 rgba(0,255,0,0.75), -0.05em -0.05em 0 rgba(0,0,255,0.75); }
             50% { text-shadow: 0.025em 0.05em 0 rgba(255,0,0,0.75), 0.05em 0 0 rgba(0,255,0,0.75), 0 -0.05em 0 rgba(0,0,255,0.75); }
-            99% { text-shadow: 0.025em 0.05em 0 rgba(255,0,0,0.75), 0.05em 0 0 rgba(0,255,0,0.75), 0 -0.05em 0 rgba(0,0,255,0.75); }
             100% { text-shadow: -0.025em 0 0 rgba(255,0,0,0.75), -0.025em -0.025em 0 rgba(0,255,0,0.75), -0.025em -0.05em 0 rgba(0,0,255,0.75); }
         }
 
-        /* Bottom Status Area */
+        /* Bottom Progress */
         .bottom-area {
             position: absolute; bottom: 60px; left: 50%;
             transform: translateX(-50%); width: 50%; z-index: 5;
@@ -118,7 +116,7 @@
             backdrop-filter: blur(5px);
         }
 
-        #tip-text { color: var(--deep-cyan); font-size: 11px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        #tip-text { color: var(--deep-cyan); font-size: 11px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; min-height: 1.2em; }
 
         .progress-rail {
             width: 100%; height: 4px; background: rgba(255,255,255,0.1);
@@ -130,7 +128,7 @@
             box-shadow: 0 0 20px var(--main-blue); transition: width 0.4s ease;
         }
 
-        /* Side Info Panels */
+        /* Side Panels */
         .side-panel {
             position: absolute; right: 50px; top: 50%; transform: translateY(-50%);
             width: 260px; z-index: 5;
@@ -148,7 +146,6 @@
         .glass-card h3 { font-family: 'Orbitron'; font-size: 14px; margin: 0 0 15px 0; color: var(--main-blue); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;}
         .data-row { font-size: 12px; margin-bottom: 10px; color: #fff; display: flex; justify-content: space-between; }
         .data-row span { color: var(--deep-cyan); }
-
     </style>
 </head>
 <body>
@@ -189,7 +186,7 @@
 
     <div class="bottom-area">
         <div class="status-container">
-            <div id="tip-text">SYNCING ASSETS...</div>
+            <div id="tip-text">INITIALIZING...</div>
             <div class="progress-rail">
                 <div id="progress-bar"></div>
             </div>
@@ -202,40 +199,73 @@
     </audio>
 
     <script>
-        // Smooth BG Transition
+        // --- 1. Background Slideshow ---
         let slides = document.querySelectorAll('.bg-slide');
         let current = 0;
-        setInterval(() => {
-            slides[current].classList.remove('active');
-            current = (current + 1) % slides.length;
-            slides[current].classList.add('active');
-        }, 10000);
+        if(slides.length > 1) {
+            setInterval(() => {
+                slides[current].classList.remove('active');
+                current = (current + 1) % slides.length;
+                slides[current].classList.add('active');
+            }, 10000);
+        }
 
-        // Tips Logic
+        // --- 2. Random Tips Logic ---
         const tips = ["DON'T FEAR THE DARK.", "PRESS F2 TO BUY PROPERTY.", "JOIN THE DISCORD FOR PRIORITY.", "REVENUE IS EVERYTHING.", "TRUST NO ONE."];
         let tIdx = 0;
-        setInterval(() => {
-            tIdx = (tIdx + 1) % tips.length;
-            document.getElementById('tip-text').innerText = tips[tIdx];
+        let tipTimer = setInterval(() => {
+            if(!window.isDownloading) {
+                tIdx = (tIdx + 1) % tips.length;
+                document.getElementById('tip-text').innerText = tips[tIdx];
+            }
         }, 4000);
 
-        // GMOD HOOKS
+        // --- 3. GMOD Global State ---
+        window.totalFiles = 0;
+        window.isDownloading = false;
+
+        // --- 4. GMOD HOOKS ---
+
+        // Basic Server Info
         function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode, volume) {
             document.getElementById('steamid').innerText = "ID: " + steamid;
             document.getElementById('mapname').innerText = mapname.toUpperCase();
+            
             let music = document.getElementById('loading-music');
             music.volume = (volume / 100) * 0.3;
-            music.play();
+            music.play().catch(e => console.log("Music blocked by browser policy"));
+        }
+
+        // PLAYER IDENTITY: This hook pulls the real Steam PFP and Name
+        function SetPlayerEntityInfo(name, steamid, communityid, avatarurl) {
+            if (name) {
+                document.getElementById('username').innerText = "AUTH_USER: " + name.toUpperCase();
+            }
+            if (avatarurl) {
+                document.getElementById('avatar').src = avatarurl;
+            }
+        }
+
+        // Progress Tracking
+        function SetFilesTotal(total) { 
+            window.totalFiles = total; 
         }
 
         function SetFilesNeeded(needed) {
+            window.isDownloading = true;
             if (window.totalFiles > 0) {
                 let p = Math.floor(((window.totalFiles - needed) / window.totalFiles) * 100);
                 document.getElementById('progress-bar').style.width = p + "%";
             }
         }
-        function SetFilesTotal(total) { window.totalFiles = total; }
-        function SetStatusChanged(status) { document.getElementById('tip-text').innerText = status.toUpperCase(); }
+
+        function SetStatusChanged(status) { 
+            document.getElementById('tip-text').innerText = status.toUpperCase(); 
+            // If we finish downloading, resume tips
+            if (status.toLowerCase().includes("sending client info")) {
+                window.isDownloading = false;
+            }
+        }
     </script>
 </body>
 </html>
