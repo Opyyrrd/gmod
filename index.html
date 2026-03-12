@@ -8,7 +8,8 @@
         :root {
             --main-blue: #00a0ff;
             --bg-dark: #0a0c12;
-            --panel-bg: rgba(15, 17, 24, 0.9);
+            --panel-bg: rgba(15, 17, 24, 0.85);
+            --accent-glow: rgba(0, 160, 255, 0.3);
         }
 
         body, html {
@@ -18,136 +19,243 @@
             font-family: 'Roboto', sans-serif;
             color: white;
             overflow: hidden;
+            user-select: none;
         }
 
-        /* Animated Background */
-        .overlay {
+        /* Animated Background Layer */
+        #bg-container {
             position: fixed;
-            top: 0; left: 0;
             width: 100%; height: 100%;
-            background: radial-gradient(circle, transparent 20%, var(--bg-dark) 80%);
-            z-index: 1;
-        }
-
-        #bg-image {
-            position: fixed;
-            width: 110%; height: 110%;
-            background: url('https://i.imgur.com/your_cool_background.jpg') no-repeat center center;
-            background-size: cover;
-            filter: blur(4px);
-            animation: pan 20s infinite alternate linear;
             z-index: 0;
         }
+
+        .bg-slide {
+            position: absolute;
+            width: 110%; height: 110%;
+            background-size: cover;
+            background-position: center;
+            filter: brightness(0.4) blur(2px);
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+            animation: pan 30s infinite alternate linear;
+        }
+
+        .bg-slide.active { opacity: 1; }
 
         @keyframes pan {
             from { transform: scale(1) translate(0, 0); }
             to { transform: scale(1.1) translate(-2%, -2%); }
         }
 
-        /* Sidebar Info */
-        .sidebar {
+        .overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(circle at center, transparent 10%, rgba(10, 12, 18, 0.9) 90%);
+            z-index: 1;
+        }
+
+        /* Top Bar: User Info */
+        .top-bar {
             position: absolute;
-            left: 50px; bottom: 50px;
-            width: 350px;
-            z-index: 2;
-            border-left: 3px solid var(--main-blue);
-            padding-left: 20px;
+            top: 30px; left: 50px;
+            display: flex;
+            align-items: center;
+            z-index: 5;
+        }
+
+        #avatar {
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            border: 2px solid var(--main-blue);
+            box-shadow: 0 0 15px var(--main-blue);
+            margin-right: 15px;
+        }
+
+        .user-meta h2 {
+            margin: 0; font-family: 'Orbitron'; font-size: 18px; color: var(--main-blue);
+        }
+
+        /* Main Center Title */
+        .center-brand {
+            position: absolute;
+            top: 45%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 5;
         }
 
         .server-title {
             font-family: 'Orbitron', sans-serif;
-            font-size: 42px;
-            letter-spacing: 5px;
-            text-shadow: 0 0 15px var(--main-blue);
+            font-size: 80px;
+            font-weight: 700;
+            letter-spacing: 15px;
+            text-shadow: 0 0 30px var(--main-blue);
             margin: 0;
+            animation: pulse 4s infinite ease-in-out;
         }
 
-        .status-container {
-            margin-top: 30px;
+        @keyframes pulse {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.02); }
         }
 
-        .bar-bg {
-            width: 100%;
-            height: 4px;
-            background: rgba(255,255,255,0.1);
-            margin-top: 10px;
+        /* Lower Progress Area */
+        .bottom-area {
+            position: absolute;
+            bottom: 50px; left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            text-align: center;
+            z-index: 5;
+        }
+
+        #tip-text {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 15px;
+            font-style: italic;
+            height: 20px;
+        }
+
+        .bar-container {
+            width: 100%; height: 6px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(0,160,255,0.2);
         }
 
         #progress-bar {
-            height: 100%;
-            width: 0%;
-            background: var(--main-blue);
-            box-shadow: 0 0 10px var(--main-blue);
-            transition: width 0.4s ease;
+            width: 0%; height: 100%;
+            background: linear-gradient(90deg, #005f99, var(--main-blue));
+            box-shadow: 0 0 15px var(--main-blue);
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         #status-text {
+            display: block;
+            margin-top: 10px;
             font-size: 12px;
+            letter-spacing: 3px;
             text-transform: uppercase;
-            letter-spacing: 2px;
             color: var(--main-blue);
         }
 
-        /* Rules/News Box */
+        /* Rules Card */
         .news-box {
             position: absolute;
-            right: 50px; top: 50px;
+            right: 50px; bottom: 50px;
             background: var(--panel-bg);
-            padding: 20px;
-            border-radius: 4px;
-            width: 300px;
-            z-index: 2;
+            padding: 25px;
+            border-radius: 8px;
+            width: 280px;
+            z-index: 5;
+            border-bottom: 3px solid var(--main-blue);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         .news-box h3 {
-            margin: 0 0 10px 0;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 14px;
+            margin: 0 0 15px 0;
+            font-family: 'Orbitron';
+            font-size: 16px;
             color: var(--main-blue);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
         }
 
-        .rule-item {
-            font-size: 13px;
-            margin-bottom: 8px;
-            color: #ccc;
-        }
+        .rule-item { font-size: 13px; margin-bottom: 10px; color: #ddd; display: flex; }
+        .rule-item span { color: var(--main-blue); margin-right: 10px; font-weight: bold; }
+
     </style>
 </head>
 <body>
-    <div id="bg-image"></div>
+    <div id="bg-container">
+        <div class="bg-slide active" style="background-image: url('https://i.imgur.com/your_image1.jpg');"></div>
+        <div class="bg-slide" style="background-image: url('https://i.imgur.com/your_image2.jpg');"></div>
+        <div class="bg-slide" style="background-image: url('https://i.imgur.com/your_image3.jpg');"></div>
+    </div>
     <div class="overlay"></div>
 
-    <div class="sidebar">
-        <h1 class="server-title">ICYUNIVERSE</h1>
-        <div class="status-container">
-            <span id="status-text">Initializing connection...</span>
-            <div class="bar-bg">
-                <div id="progress-bar"></div>
-            </div>
+    <div class="top-bar">
+        <img id="avatar" src="https://i.imgur.com/6E7p7vC.png"> <div class="user-meta">
+            <h2 id="username">WELCOME PLAYER</h2>
+            <small style="opacity: 0.5" id="steamid">STEAM_0:0:000000</small>
         </div>
     </div>
 
-    <div class="news-box">
-        <h3>SERVER RULES</h3>
-        <div class="rule-item">1. No RDM / No Prop Block</div>
-        <div class="rule-item">2. Respect all players & staff</div>
-        <div class="rule-item">3. Do not exploit physics bugs</div>
+    <div class="center-brand">
+        <h1 class="server-title">ICYUNIVERSE</h1>
+        <p style="letter-spacing: 8px; color: #aaa;">SERIOUS ROLEPLAY</p>
     </div>
 
+    <div class="bottom-area">
+        <div id="tip-text">Press F2 to open the Door Menu once in-game.</div>
+        <div class="bar-container">
+            <div id="progress-bar"></div>
+        </div>
+        <span id="status-text">INITIALIZING QUANTUM LINK...</span>
+    </div>
+
+    <div class="news-box">
+        <h3>PROTOCOL</h3>
+        <div class="rule-item"><span>01</span> No RDM or Prop-Abuse</div>
+        <div class="rule-item"><span>02</span> Listen to Staff Instructions</div>
+        <div class="rule-item"><span>03</span> FailRP is not tolerated</div>
+        <div class="rule-item"><span>04</span> Use common sense</div>
+    </div>
+
+    <audio id="loading-music" loop>
+        <source src="your_music_link.mp3" type="audio/mpeg">
+    </audio>
+
     <script type="text/javascript">
-        // GMod communication functions
+        // Background Cycling
+        let slides = document.querySelectorAll('.bg-slide');
+        let currentSlide = 0;
+        setInterval(() => {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.add('active');
+        }, 8000);
+
+        // Tips Cycling
+        const tips = [
+            "Need help? Join our Discord community!",
+            "Type /givemoney to share your wealth.",
+            "Don't forget to buy a door using F2!",
+            "Admins are here to help, use @ to call them.",
+            "Be sure to read the full rules on our forums."
+        ];
+        let tipIndex = 0;
+        setInterval(() => {
+            tipIndex = (tipIndex + 1) % tips.length;
+            document.getElementById('tip-text').innerText = tips[tipIndex];
+        }, 5000);
+
+        // GMod Data Integration
+        function GameDetails( servername, serverurl, mapname, maxplayers, steamid, gamemode, volume, language ) {
+            document.getElementById('steamid').innerText = steamid;
+            // Attempt to get avatar via Steam (needs a proxy or API usually, using fallback here)
+            // You can use a web API to get the name/avatar via steamid if server is set up
+            
+            let music = document.getElementById('loading-music');
+            music.volume = (volume / 100) * 0.5; // Set volume based on GMod settings
+            music.play();
+        }
+
         function SetStatusChanged(status) {
             document.getElementById('status-text').innerText = status;
         }
 
+        let totalFiles = 0;
         function SetFilesTotal(total) {
-            this.totalFiles = total;
+            totalFiles = total;
         }
 
         function SetFilesNeeded(needed) {
-            var filesLeft = needed;
-            if (this.totalFiles > 0) {
-                var percentage = Math.floor(((this.totalFiles - filesLeft) / this.totalFiles) * 100);
+            if (totalFiles > 0) {
+                let percentage = Math.floor(((totalFiles - needed) / totalFiles) * 100);
                 document.getElementById('progress-bar').style.width = percentage + "%";
             }
         }
