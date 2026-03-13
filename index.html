@@ -6,11 +6,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@300;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --main-blue: #00a0ff;
-            --deep-cyan: #00ffd5;
-            --bg-dark: #020406;
-            --panel-bg: rgba(5, 10, 20, 0.85);
-            --glass-border: rgba(0, 160, 255, 0.4);
+            --main-blue: #a0e0ff;
+            --deep-cyan: #e0ffff;
+            --bg-dark: #01080e;
+            --ice-glow: rgba(160, 224, 255, 0.6);
+            --panel-bg: rgba(5, 15, 25, 0.7);
         }
 
         body, html {
@@ -23,20 +23,35 @@
             user-select: none;
         }
 
+        /* --- Ice Texture Overlay --- */
+        body::before {
+            content: "";
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/frozen-wall.png');
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: 12;
+        }
+
         /* --- Global FX --- */
         .scanlines {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
-                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-            z-index: 10; background-size: 100% 3px, 3px 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(255, 255, 255, 0.02) 50%);
+            z-index: 13; background-size: 100% 4px;
             pointer-events: none;
+        }
+
+        .vignette {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, transparent 40%, rgba(0,20,40,0.8) 100%);
+            z-index: 2; pointer-events: none;
         }
 
         #bg-container { position: fixed; width: 100%; height: 100%; z-index: 0; }
         .bg-slide {
             position: absolute; width: 110%; height: 110%;
             background-size: cover; background-position: center;
-            filter: brightness(0.4) blur(2px);
+            filter: brightness(0.5) saturate(0.5) contrast(1.2);
             opacity: 0; transition: opacity 2s ease-in-out;
             animation: pan 30s infinite alternate linear;
         }
@@ -47,40 +62,25 @@
             to { transform: scale(1.1); translate: -2% -2%; }
         }
 
+        /* --- UI Elements --- */
         .top-bar {
             position: absolute; top: 40px; left: 40px;
             display: flex; align-items: center; z-index: 15;
             background: var(--panel-bg);
-            padding: 12px 25px 12px 12px;
+            padding: 12px 35px 12px 12px;
             border-left: 4px solid var(--main-blue);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 0 20px var(--ice-glow);
+            clip-path: polygon(0 0, 100% 0, 92% 100%, 0 100%);
         }
 
-        .avatar-wrapper { position: relative; width: 60px; height: 60px; background: #000; overflow: hidden; }
-        #avatar {
-            width: 100%; height: 100%; 
-            border: 1px solid var(--glass-border);
-            object-fit: cover;
-            opacity: 0.5;
-            transition: opacity 0.5s ease;
-        }
-        
-        #avatar.scanning {
-            filter: brightness(0.5) sepia(1) hue-rotate(180deg);
-            animation: avatarPulse 1.5s infinite;
-        }
-
-        .avatar-frame {
-            position: absolute; top: -5px; left: -5px; width: 70px; height: 70px;
-            border: 1px solid var(--main-blue); opacity: 0.5;
-            z-index: 16; pointer-events: none;
-            animation: pulse 2s infinite;
-        }
+        .avatar-wrapper { position: relative; width: 60px; height: 60px; background: #000; border: 1px solid var(--main-blue); overflow: hidden; }
+        #avatar { width: 100%; height: 100%; object-fit: cover; opacity: 0.5; filter: saturate(0) brightness(1.2); transition: all 0.5s ease; }
+        #avatar.scanning { animation: avatarPulse 1.5s infinite; }
 
         .user-meta { margin-left: 20px; }
         .user-meta h2 { margin: 0; font-family: 'Orbitron'; font-size: 16px; color: white; letter-spacing: 2px; text-transform: uppercase; }
-        .user-meta small { color: var(--main-blue); font-weight: bold; font-size: 11px; display: block; margin-top: 4px; }
+        .user-meta small { color: var(--main-blue); font-weight: bold; font-size: 11px; display: block; margin-top: 4px; text-shadow: 0 0 5px var(--main-blue); }
 
         .center-brand {
             position: absolute; top: 45%; left: 50%;
@@ -89,61 +89,55 @@
         .server-title {
             font-family: 'Orbitron'; font-size: 110px; font-weight: 900;
             letter-spacing: 35px; margin: 0;
-            background: linear-gradient(to bottom, #fff 40%, var(--main-blue));
+            background: linear-gradient(180deg, #ffffff 30%, #a0e0ff 60%, #00a0ff 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 15px rgba(0, 160, 255, 0.5));
+            filter: drop-shadow(0 0 30px rgba(160, 224, 255, 0.4));
+            animation: shiver 8s infinite;
         }
 
         .bottom-area {
             position: absolute; bottom: 80px; left: 50%;
             transform: translateX(-50%); width: 40%; z-index: 20;
         }
-        .loading-stats {
-            display: flex; justify-content: space-between;
-            font-size: 10px; color: var(--main-blue);
-            margin-bottom: 10px; font-weight: bold; letter-spacing: 2px;
-        }
+        .loading-stats { display: flex; justify-content: space-between; font-size: 10px; color: var(--main-blue); margin-bottom: 10px; font-weight: bold; letter-spacing: 2px; }
+        
         .progress-rail {
-            width: 100%; height: 2px; background: rgba(255,255,255,0.05);
-            position: relative;
+            width: 100%; height: 6px; background: rgba(255,255,255,0.05);
+            position: relative; border-radius: 10px; overflow: hidden;
+            border: 1px solid rgba(160, 224, 255, 0.2);
         }
-        #progress-bar {
-            width: 0%; height: 100%; background: var(--main-blue);
-            box-shadow: 0 0 15px var(--main-blue); transition: width 0.4s ease;
+        #progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #00a0ff, #e0ffff); box-shadow: 0 0 20px #00a0ff; transition: width 0.4s ease; }
+
+        .side-info { position: absolute; left: 40px; bottom: 80px; border-left: 1px solid var(--main-blue); padding-left: 15px; font-size: 11px; color: rgba(255,255,255,0.4); }
+        .side-info span { display: block; margin-bottom: 5px; }
+        .side-info span b { color: var(--main-blue); text-shadow: 0 0 8px var(--main-blue); }
+
+        .snow-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 11; }
+
+        @keyframes shiver {
+            0%, 95%, 100% { transform: translateX(0); }
+            96% { transform: translateX(2px) skewX(1deg); }
+            98% { transform: translateX(-1px); }
         }
 
-        .side-info {
-            position: absolute; left: 40px; bottom: 80px;
-            border-left: 1px solid var(--main-blue); padding-left: 15px;
-            font-size: 11px; color: rgba(255,255,255,0.4);
-        }
-        .side-info span { color: var(--deep-cyan); display: block; margin-bottom: 5px; }
-
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.5; }
-            50% { transform: scale(1.05); opacity: 0.2; }
-            100% { transform: scale(1); opacity: 0.5; }
-        }
-
-        @keyframes avatarPulse {
-            0%, 100% { opacity: 0.8; }
-            50% { opacity: 0.2; }
-        }
+        @keyframes avatarPulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 0.2; } }
     </style>
 </head>
 <body>
     <div class="scanlines"></div>
+    <div class="vignette"></div>
+    <div class="snow-container" id="snow"></div>
+    
     <div id="bg-container">
         <div class="bg-slide active" style="background-image: url('https://i.imgur.com/Oo059b7.jpeg');"></div>
     </div>
 
     <div class="top-bar">
         <div class="avatar-wrapper">
-            <div class="avatar-frame"></div>
             <img id="avatar" class="scanning" src="https://i.imgur.com/6E7p7vC.png">
         </div>
         <div class="user-meta">
-            <small id="auth-tag">ESTABLISHING LINK...</small>
+            <small id="auth-tag">ESTABLISHING CRYOLINK...</small>
             <h2 id="username">SCANNING USER</h2>
             <small id="steamid">ID: SEARCHING...</small>
         </div>
@@ -157,6 +151,7 @@
     <div class="side-info">
         <span>MAP: <b id="mapname">SEARCHING...</b></span>
         <span>SECTOR: <b>US-CENTRAL-1</b></span>
+        <span>TEMP: <b>-42°C</b></span>
         <span>STATUS: <b id="status-update">INITIALIZING</b></span>
     </div>
 
@@ -171,14 +166,42 @@
     </div>
 
     <audio id="loading-music" loop>
-        <source src="music.mp3" type="audio/mpeg">
+        <source src="Grover Washington Jr. feat. Bill Withers - Just The Two of Us [HQ].mp3" type="audio/mpeg">
     </audio>
 
     <script>
-        // --- CONFIG ---
         const API_KEY = "0361C734098BF57ADC9218A662B38B20";
 
-        // --- HELPERS ---
+        // --- SNOW SYSTEM ---
+        function createSnow() {
+            const container = document.getElementById('snow');
+            for (let i = 0; i < 60; i++) {
+                let flake = document.createElement('div');
+                flake.style.position = 'absolute';
+                flake.style.width = (Math.random() * 3) + 'px';
+                flake.style.height = flake.style.width;
+                flake.style.background = 'white';
+                flake.style.borderRadius = '50%';
+                flake.style.opacity = Math.random();
+                flake.style.top = Math.random() * 100 + '%';
+                flake.style.left = Math.random() * 100 + '%';
+                flake.style.filter = 'blur(1px)';
+                container.appendChild(flake);
+                animateFlake(flake);
+            }
+        }
+
+        function animateFlake(f) {
+            let speed = 0.1 + Math.random() * 0.4;
+            let pos = parseFloat(f.style.top);
+            setInterval(() => {
+                pos += speed;
+                if (pos > 100) pos = -5;
+                f.style.top = pos + '%';
+            }, 30);
+        }
+
+        // --- STEAM DATA ---
         function getQueryVariable(variable) {
             var query = window.location.search.substring(1);
             var vars = query.split("&");
@@ -189,11 +212,8 @@
             return(false);
         }
 
-        // --- STEAM API FALLBACK ---
         function fetchSteamData(steamid64) {
             if(!steamid64 || steamid64 == "0") return;
-
-            // We use a CORS proxy because Steam API doesn't allow direct browser calls
             const proxy = "https://api.allorigins.win/get?url=";
             const steamUrl = encodeURIComponent(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${API_KEY}&steamids=${steamid64}`);
 
@@ -205,72 +225,58 @@
                         const p = obj.response.players[0];
                         updatePlayerUI(p.personaname, p.steamid, p.avatarfull);
                     }
-                })
-                .catch(err => console.log("API Error: ", err));
-        }
-
-        // --- GMOD ENGINE HOOKS ---
-
-        function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode, volume) {
-            if (mapname) document.getElementById('mapname').innerText = mapname.toUpperCase();
-            if (steamid && steamid !== "0") {
-                document.getElementById('steamid').innerText = "ID: " + steamid;
-                // Start API fetch immediately if engine is slow
-                fetchSteamData(steamid);
-            }
-            
-            let music = document.getElementById('loading-music');
-            music.volume = 0.2;
-            music.play().catch(e => console.log("Audio waiting"));
-        }
-
-        function SetPlayerEntityInfo(name, steamid, communityid, avatarurl) {
-            // If the engine sends valid data, use it. Otherwise, let API handle it.
-            if(name && name !== "undefined" && name !== "Loading...") {
-                updatePlayerUI(name, steamid, avatarurl);
-            }
+                });
         }
 
         function updatePlayerUI(name, steamid, avatarurl) {
-            if (name && name !== "undefined") {
+            if (name) {
                 document.getElementById('username').innerText = decodeURIComponent(name).toUpperCase();
                 document.getElementById('auth-tag').innerText = "SUBJECT_IDENTIFIED";
             }
-            if (steamid && steamid !== "0") {
-                document.getElementById('steamid').innerText = "ID: " + steamid;
-            }
-            if (avatarurl && avatarurl !== "" && avatarurl !== "noimage") {
+            if (steamid) document.getElementById('steamid').innerText = "ID: " + steamid;
+            if (avatarurl) {
                 const img = document.getElementById('avatar');
                 img.src = avatarurl;
-                img.onload = function() {
+                img.onload = () => {
                     img.classList.remove('scanning');
                     img.style.opacity = "1";
                     img.style.filter = "none";
+                    img.style.border = "1px solid var(--main-blue)";
                 };
             }
         }
 
-        // --- INITIALIZATION ---
-        window.onload = function() {
-            var urlID = getQueryVariable("steamid");
-            if(urlID) {
-                fetchSteamData(urlID);
+        // --- GMOD HOOKS ---
+        function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode, volume) {
+            if (mapname) document.getElementById('mapname').innerText = mapname.toUpperCase();
+            if (steamid && steamid !== "0") {
+                document.getElementById('steamid').innerText = "ID: " + steamid;
+                fetchSteamData(steamid);
             }
-        };
+            let music = document.getElementById('loading-music');
+            music.volume = 0.2;
+            music.play().catch(e => console.log("Audio waiting for interaction"));
+        }
 
-        let totalFiles = 0;
-        function SetFilesTotal(total) { totalFiles = total; }
+        function SetFilesTotal(total) { window.totalFiles = total; }
         function SetFilesNeeded(needed) {
-            let downloaded = Math.max(0, totalFiles - needed);
-            let percentage = (totalFiles > 0) ? Math.floor((downloaded / totalFiles) * 100) : 0;
+            let downloaded = Math.max(0, (window.totalFiles || 0) - needed);
+            let percentage = (window.totalFiles > 0) ? Math.floor((downloaded / window.totalFiles) * 100) : 0;
             document.getElementById('progress-bar').style.width = percentage + "%";
             document.getElementById('percent-text').innerText = percentage + "%";
         }
+
         function SetStatusChanged(status) {
             document.getElementById('status-update').innerText = status.toUpperCase();
             let displayStatus = status.replace(/Downloading|Extracting/gi, "").trim();
-            document.getElementById('tip-text').innerText = displayStatus || "PROCESSING...";
+            document.getElementById('tip-text').innerText = displayStatus || "FREEZING DATA...";
         }
+
+        window.onload = function() {
+            createSnow();
+            var urlID = getQueryVariable("steamid");
+            if(urlID) fetchSteamData(urlID);
+        };
     </script>
 </body>
 </html>
