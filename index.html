@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>IcyUniverse Loading</title>
+    <title>IcyUniverse | Neural Link</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@300;500&display=swap" rel="stylesheet">
     <style>
         :root {
             --main-blue: #00a0ff;
             --deep-cyan: #00ffd5;
-            --bg-dark: #05070a;
-            --panel-bg: rgba(10, 15, 25, 0.7);
-            --glass-border: rgba(0, 160, 255, 0.3);
+            --bg-dark: #020406;
+            --panel-bg: rgba(5, 10, 20, 0.85);
+            --glass-border: rgba(0, 160, 255, 0.4);
         }
 
         body, html {
@@ -23,183 +23,151 @@
             user-select: none;
         }
 
-        /* Scanline Effect */
-        body::after {
-            content: " ";
-            display: block;
-            position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            z-index: 10;
-            background-size: 100% 2px, 3px 100%;
+        /* --- Global FX --- */
+        .scanlines {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            z-index: 10; background-size: 100% 3px, 3px 100%;
             pointer-events: none;
         }
 
-        /* Background Layers */
         #bg-container { position: fixed; width: 100%; height: 100%; z-index: 0; }
         .bg-slide {
             position: absolute; width: 110%; height: 110%;
             background-size: cover; background-position: center;
-            filter: brightness(0.3) contrast(1.2) saturate(0.8);
-            opacity: 0; transition: opacity 2.5s ease;
-            animation: pan 40s infinite alternate linear;
+            filter: brightness(0.4) blur(2px);
+            opacity: 0; transition: opacity 2s ease-in-out;
+            animation: pan 30s infinite alternate linear;
         }
         .bg-slide.active { opacity: 1; }
 
         @keyframes pan {
-            from { transform: translate(0, 0) scale(1); }
-            to { transform: translate(-3%, -3%) scale(1.1); }
+            from { transform: scale(1.0); translate: 0% 0%; }
+            to { transform: scale(1.1); translate: -2% -2%; }
         }
 
-        .vignette {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, transparent 20%, black 110%);
-            z-index: 1;
-        }
-
-        /* Top Bar: Avatar & Identity */
+        /* --- Identity Bar (Top Left) --- */
         .top-bar {
-            position: absolute; top: 40px; left: 50px;
-            display: flex; align-items: center; z-index: 5;
+            position: absolute; top: 40px; left: 40px;
+            display: flex; align-items: center; z-index: 15;
             background: var(--panel-bg);
-            padding: 10px 25px 10px 10px;
-            border-radius: 50px 10px 10px 50px;
-            border: 1px solid var(--glass-border);
+            padding: 12px 25px 12px 12px;
+            border-left: 4px solid var(--main-blue);
             backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
+        .avatar-wrapper { position: relative; width: 60px; height: 60px; }
         #avatar {
-            width: 55px; height: 55px; border-radius: 50%;
-            border: 2px solid var(--main-blue);
-            box-shadow: 0 0 15px var(--main-blue);
+            width: 100%; height: 100%; 
+            border: 1px solid var(--glass-border);
             object-fit: cover;
         }
+        .avatar-frame {
+            position: absolute; top: -5px; left: -5px; width: 70px; height: 70px;
+            border: 1px solid var(--main-blue); opacity: 0.5;
+            animation: pulse 2s infinite;
+        }
 
-        .user-meta { margin-left: 15px; }
-        .user-meta h2 { margin: 0; font-family: 'Orbitron'; font-size: 14px; letter-spacing: 2px; color: var(--main-blue); }
-        .user-meta small { color: var(--deep-cyan); opacity: 0.8; font-size: 10px; }
+        .user-meta { margin-left: 20px; }
+        .user-meta h2 { margin: 0; font-family: 'Orbitron'; font-size: 16px; color: white; letter-spacing: 2px; }
+        .user-meta small { color: var(--main-blue); font-weight: bold; font-size: 11px; display: block; margin-top: 4px; }
 
-        /* Branding */
+        /* --- Branding --- */
         .center-brand {
             position: absolute; top: 45%; left: 50%;
             transform: translate(-50%, -50%); text-align: center; z-index: 5;
-            width: 100%;
         }
-
         .server-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 95px; font-weight: 900;
-            letter-spacing: 25px;
-            color: white;
-            text-transform: uppercase;
-            position: relative;
-            text-shadow: 0.05em 0 0 rgba(255,0,0,0.75), -0.025em -0.05em 0 rgba(0,255,0,0.75), 0.025em 0.05em 0 rgba(0,0,255,0.75);
-            animation: glitch 500ms infinite;
+            font-family: 'Orbitron'; font-size: 110px; font-weight: 900;
+            letter-spacing: 35px; margin: 0;
+            background: linear-gradient(to bottom, #fff 40%, var(--main-blue));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(0, 160, 255, 0.5));
         }
 
-        @keyframes glitch {
-            0% { text-shadow: 0.05em 0 0 rgba(255,0,0,0.75), -0.05em -0.025em 0 rgba(0,255,0,0.75), -0.025em 0.05em 0 rgba(0,0,255,0.75); }
-            50% { text-shadow: 0.025em 0.05em 0 rgba(255,0,0,0.75), 0.05em 0 0 rgba(0,255,0,0.75), 0 -0.05em 0 rgba(0,0,255,0.75); }
-            100% { text-shadow: -0.025em 0 0 rgba(255,0,0,0.75), -0.025em -0.025em 0 rgba(0,255,0,0.75), -0.025em -0.05em 0 rgba(0,0,255,0.75); }
-        }
-
-        /* Bottom Progress */
+        /* --- Progress Area --- */
         .bottom-area {
-            position: absolute; bottom: 60px; left: 50%;
-            transform: translateX(-50%); width: 50%; z-index: 5;
+            position: absolute; bottom: 80px; left: 50%;
+            transform: translateX(-50%); width: 40%; z-index: 20;
         }
-
-        .status-container {
-            background: var(--panel-bg);
-            border: 1px solid var(--glass-border);
-            padding: 15px; border-radius: 4px;
-            backdrop-filter: blur(5px);
+        .loading-stats {
+            display: flex; justify-content: space-between;
+            font-size: 10px; color: var(--main-blue);
+            margin-bottom: 10px; font-weight: bold; letter-spacing: 2px;
         }
-
-        #tip-text { color: var(--deep-cyan); font-size: 11px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; min-height: 1.2em; }
-
         .progress-rail {
-            width: 100%; height: 4px; background: rgba(255,255,255,0.1);
-            position: relative; overflow: hidden;
+            width: 100%; height: 2px; background: rgba(255,255,255,0.05);
+            position: relative;
         }
-
         #progress-bar {
             width: 0%; height: 100%; background: var(--main-blue);
-            box-shadow: 0 0 20px var(--main-blue); transition: width 0.4s ease;
+            box-shadow: 0 0 15px var(--main-blue); transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Side Panels */
-        .side-panel {
-            position: absolute; right: 50px; top: 50%; transform: translateY(-50%);
-            width: 260px; z-index: 5;
+        /* --- Decorative Data (Sides) --- */
+        .side-info {
+            position: absolute; left: 40px; bottom: 80px;
+            border-left: 1px solid var(--main-blue); padding-left: 15px;
+            font-size: 11px; color: rgba(255,255,255,0.4);
         }
+        .side-info span { color: var(--deep-cyan); display: block; margin-bottom: 5px; }
 
-        .glass-card {
-            background: var(--panel-bg);
-            border-left: 4px solid var(--main-blue);
-            padding: 20px; border-radius: 0 8px 8px 0;
-            backdrop-filter: blur(15px);
-            margin-bottom: 20px;
-            box-shadow: 20px 0 50px rgba(0,0,0,0.5);
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.05); opacity: 0.2; }
+            100% { transform: scale(1); opacity: 0.5; }
         }
-
-        .glass-card h3 { font-family: 'Orbitron'; font-size: 14px; margin: 0 0 15px 0; color: var(--main-blue); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;}
-        .data-row { font-size: 12px; margin-bottom: 10px; color: #fff; display: flex; justify-content: space-between; }
-        .data-row span { color: var(--deep-cyan); }
     </style>
 </head>
 <body>
+    <div class="scanlines"></div>
+    
     <div id="bg-container">
-        <div class="bg-slide active" style="background-image: url('https://i.imgur.com/your_img1.jpg');"></div>
+        <div class="bg-slide active" style="background-image: url('https://i.imgur.com/39hN7fB.jpg');"></div>
         <div class="bg-slide" style="background-image: url('https://i.imgur.com/your_img2.jpg');"></div>
     </div>
-    <div class="vignette"></div>
 
     <div class="top-bar">
-        <img id="avatar" src="https://i.imgur.com/6E7p7vC.png">
+        <div class="avatar-wrapper">
+            <div class="avatar-frame"></div>
+            <img id="avatar" src="https://i.imgur.com/6E7p7vC.png">
+        </div>
         <div class="user-meta">
-            <h2 id="username">AUTH_USER: UNKNOWN</h2>
-            <small id="steamid">ID: STEAM_0:0:00000000</small>
+            <small>SUBJECT_IDENTIFIED</small>
+            <h2 id="username">CONNECTING...</h2>
+            <small id="steamid">STEAM_ID_PENDING</small>
         </div>
     </div>
 
     <div class="center-brand">
         <h1 class="server-title">ICYUNIVERSE</h1>
-        <div style="height: 2px; background: var(--main-blue); width: 100%; margin-top: -15px; box-shadow: 0 0 15px var(--main-blue);"></div>
-        <p style="letter-spacing: 12px; font-size: 12px; color: var(--deep-cyan); margin-top: 10px; font-weight: bold;">NEURAL LINK ESTABLISHED</p>
+        <p style="letter-spacing: 15px; font-size: 11px; color: var(--main-blue); opacity: 0.7;">CYBERNETIC ROLEPLAY EXPERIENCE</p>
     </div>
 
-    <div class="side-panel">
-        <div class="glass-card">
-            <h3>SERVER_RULES</h3>
-            <div class="data-row">01. NO RDM <span>[LOCKED]</span></div>
-            <div class="data-row">02. NO PROP SPAM <span>[LOCKED]</span></div>
-            <div class="data-row">03. RESPECT STAFF <span>[LOCKED]</span></div>
-            <div class="data-row">04. USE MIC <span>[REQ]</span></div>
-        </div>
-        <div class="glass-card" style="border-left-color: var(--deep-cyan);">
-            <h3>SECTOR_INFO</h3>
-            <div class="data-row">MAP: <span id="mapname">LOADING...</span></div>
-            <div class="data-row">MODE: <span>DARKRP</span></div>
-        </div>
+    <div class="side-info">
+        <span>MAP: <b id="mapname">SEARCHING...</b></span>
+        <span>SECTOR: <b>US-CENTRAL-1</b></span>
+        <span>STATUS: <b id="status-update">INITIALIZING</b></span>
     </div>
 
     <div class="bottom-area">
-        <div class="status-container">
-            <div id="tip-text">INITIALIZING...</div>
-            <div class="progress-rail">
-                <div id="progress-bar"></div>
-            </div>
-            <div id="status-text" style="font-size: 9px; margin-top: 8px; color: #666; letter-spacing: 2px;">CONNECTION STABLE // PORT: 27015</div>
+        <div class="loading-stats">
+            <div id="tip-text">SYNCING DATA BLOCKS...</div>
+            <div id="percent-text">0%</div>
+        </div>
+        <div class="progress-rail">
+            <div id="progress-bar"></div>
         </div>
     </div>
 
     <audio id="loading-music" loop>
-        <source src="Grover Washington Jr. feat. Bill Withers - Just The Two of Us [HQ].mp3" type="audio/mpeg">
+        <source src="music.mp3" type="audio/mpeg">
     </audio>
 
     <script>
-        // --- 1. Background Slideshow ---
+        // Slideshow Logic
         let slides = document.querySelectorAll('.bg-slide');
         let current = 0;
         if(slides.length > 1) {
@@ -207,64 +175,44 @@
                 slides[current].classList.remove('active');
                 current = (current + 1) % slides.length;
                 slides[current].classList.add('active');
-            }, 10000);
+            }, 8000);
         }
 
-        // --- 2. Random Tips Logic ---
-        const tips = ["DON'T FEAR THE DARK.", "PRESS F2 TO BUY PROPERTY.", "JOIN THE DISCORD FOR PRIORITY.", "REVENUE IS EVERYTHING.", "TRUST NO ONE."];
-        let tIdx = 0;
-        let tipTimer = setInterval(() => {
-            if(!window.isDownloading) {
-                tIdx = (tIdx + 1) % tips.length;
-                document.getElementById('tip-text').innerText = tips[tIdx];
-            }
-        }, 4000);
+        // --- GMOD INTEGRATION ---
 
-        // --- 3. GMOD Global State ---
-        window.totalFiles = 0;
-        window.isDownloading = false;
-
-        // --- 4. GMOD HOOKS ---
-
-        // Basic Server Info
         function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode, volume) {
-            document.getElementById('steamid').innerText = "ID: " + steamid;
             document.getElementById('mapname').innerText = mapname.toUpperCase();
+            document.getElementById('steamid').innerText = steamid;
             
             let music = document.getElementById('loading-music');
-            music.volume = (volume / 100) * 0.3;
-            music.play().catch(e => console.log("Music blocked by browser policy"));
+            music.volume = 0.2;
+            music.play();
         }
 
-        // PLAYER IDENTITY: This hook pulls the real Steam PFP and Name
+        // This is the CRITICAL hook for Name/PFP
         function SetPlayerEntityInfo(name, steamid, communityid, avatarurl) {
-            if (name) {
-                document.getElementById('username').innerText = "AUTH_USER: " + name.toUpperCase();
-            }
-            if (avatarurl) {
+            document.getElementById('username').innerText = name.toUpperCase();
+            document.getElementById('steamid').innerText = steamid;
+            if (avatarurl && avatarurl !== "") {
                 document.getElementById('avatar').src = avatarurl;
             }
         }
 
-        // Progress Tracking
-        function SetFilesTotal(total) { 
-            window.totalFiles = total; 
-        }
+        let totalFiles = 0;
+        function SetFilesTotal(total) { totalFiles = total; }
 
         function SetFilesNeeded(needed) {
-            window.isDownloading = true;
-            if (window.totalFiles > 0) {
-                let p = Math.floor(((window.totalFiles - needed) / window.totalFiles) * 100);
-                document.getElementById('progress-bar').style.width = p + "%";
-            }
+            let downloaded = Math.max(0, totalFiles - needed);
+            let percentage = (totalFiles > 0) ? Math.floor((downloaded / totalFiles) * 100) : 0;
+            
+            document.getElementById('progress-bar').style.width = percentage + "%";
+            document.getElementById('percent-text').innerText = percentage + "%";
         }
 
-        function SetStatusChanged(status) { 
-            document.getElementById('tip-text').innerText = status.toUpperCase(); 
-            // If we finish downloading, resume tips
-            if (status.toLowerCase().includes("sending client info")) {
-                window.isDownloading = false;
-            }
+        function SetStatusChanged(status) {
+            document.getElementById('status-update').innerText = status.toUpperCase();
+            if(status.length > 30) status = status.substring(0, 30) + "...";
+            document.getElementById('tip-text').innerText = status.toUpperCase();
         }
     </script>
 </body>
