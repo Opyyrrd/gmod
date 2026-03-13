@@ -58,15 +58,15 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        .avatar-wrapper { position: relative; width: 60px; height: 60px; background: #000; }
+        .avatar-wrapper { position: relative; width: 60px; height: 60px; background: #000; overflow: hidden; }
         #avatar {
             width: 100%; height: 100%; 
             border: 1px solid var(--glass-border);
             object-fit: cover;
+            opacity: 0.5;
             transition: opacity 0.5s ease;
         }
         
-        /* Scanning effect for when PFP isn't loaded yet */
         #avatar.scanning {
             filter: brightness(0.5) sepia(1) hue-rotate(180deg);
             animation: avatarPulse 1.5s infinite;
@@ -75,6 +75,8 @@
         .avatar-frame {
             position: absolute; top: -5px; left: -5px; width: 70px; height: 70px;
             border: 1px solid var(--main-blue); opacity: 0.5;
+            z-index: 16;
+            pointer-events: none;
             animation: pulse 2s infinite;
         }
 
@@ -129,8 +131,8 @@
         }
 
         @keyframes avatarPulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 0.2; }
         }
     </style>
 </head>
@@ -179,22 +181,20 @@
     </audio>
 
     <script>
-        // --- GMOD HOOKS ---
+        // --- GMOD ENGINE HOOKS ---
 
         function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode, volume) {
             document.getElementById('mapname').innerText = mapname.toUpperCase();
             
-            // Fail-safe: Update ID if engine provides it early
             if (steamid && steamid !== "0") {
                 document.getElementById('steamid').innerText = "ID: " + steamid;
             }
             
             let music = document.getElementById('loading-music');
             music.volume = 0.2;
-            music.play().catch(e => console.log("Audio waiting for interaction"));
+            music.play().catch(e => console.log("Audio waiting for user interaction"));
         }
 
-        // The Engine calls this once the handshake is successful
         function SetPlayerEntityInfo(name, steamid, communityid, avatarurl) {
             if (name) {
                 document.getElementById('username').innerText = name;
@@ -203,10 +203,19 @@
             if (steamid) {
                 document.getElementById('steamid').innerText = "ID: " + steamid;
             }
+
+            const img = document.getElementById('avatar');
+            
+            // Check if engine provides a valid Steam avatar URL
             if (avatarurl && avatarurl !== "" && avatarurl !== "noimage") {
-                const img = document.getElementById('avatar');
                 img.src = avatarurl;
-                img.classList.remove('scanning'); // Removes the blink effect
+                
+                // Stop the scanning animation once the real Steam pfp loads
+                img.onload = function() {
+                    img.classList.remove('scanning');
+                    img.style.opacity = "1";
+                    img.style.filter = "none";
+                };
             }
         }
 
@@ -223,7 +232,6 @@
 
         function SetStatusChanged(status) {
             document.getElementById('status-update').innerText = status.toUpperCase();
-            // Simplify status for the tip area
             let displayStatus = status.replace(/Downloading|Extracting/gi, "").trim();
             document.getElementById('tip-text').innerText = displayStatus || "PROCESSING...";
         }
