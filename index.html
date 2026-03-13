@@ -47,7 +47,6 @@
             to { transform: scale(1.1); translate: -2% -2%; }
         }
 
-        /* --- Identity Bar (Top Left) --- */
         .top-bar {
             position: absolute; top: 40px; left: 40px;
             display: flex; align-items: center; z-index: 15;
@@ -75,8 +74,7 @@
         .avatar-frame {
             position: absolute; top: -5px; left: -5px; width: 70px; height: 70px;
             border: 1px solid var(--main-blue); opacity: 0.5;
-            z-index: 16;
-            pointer-events: none;
+            z-index: 16; pointer-events: none;
             animation: pulse 2s infinite;
         }
 
@@ -84,7 +82,6 @@
         .user-meta h2 { margin: 0; font-family: 'Orbitron'; font-size: 16px; color: white; letter-spacing: 2px; text-transform: uppercase; }
         .user-meta small { color: var(--main-blue); font-weight: bold; font-size: 11px; display: block; margin-top: 4px; }
 
-        /* --- Branding --- */
         .center-brand {
             position: absolute; top: 45%; left: 50%;
             transform: translate(-50%, -50%); text-align: center; z-index: 5;
@@ -97,7 +94,6 @@
             filter: drop-shadow(0 0 15px rgba(0, 160, 255, 0.5));
         }
 
-        /* --- Progress Area --- */
         .bottom-area {
             position: absolute; bottom: 80px; left: 50%;
             transform: translateX(-50%); width: 40%; z-index: 20;
@@ -116,7 +112,6 @@
             box-shadow: 0 0 15px var(--main-blue); transition: width 0.4s ease;
         }
 
-        /* --- Decorative Data (Sides) --- */
         .side-info {
             position: absolute; left: 40px; bottom: 80px;
             border-left: 1px solid var(--main-blue); padding-left: 15px;
@@ -138,7 +133,6 @@
 </head>
 <body>
     <div class="scanlines"></div>
-    
     <div id="bg-container">
         <div class="bg-slide active" style="background-image: url('https://i.imgur.com/Oo059b7.jpeg');"></div>
     </div>
@@ -181,36 +175,45 @@
     </audio>
 
     <script>
+        // --- HELPERS ---
+        // GMod passes variables via URL (e.g., ?steamid=123&mapname=gm_flatgrass)
+        // This function ensures data shows even if the engine hook misses.
+        function getQueryVariable(variable) {
+            var query = window.location.search.substring(1);
+            var vars = query.split("&");
+            for (var i=0; i<vars.length; i++) {
+                var pair = vars[i].split("=");
+                if(pair[0] == variable){ return pair[1]; }
+            }
+            return(false);
+        }
+
         // --- GMOD ENGINE HOOKS ---
 
         function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode, volume) {
-            document.getElementById('mapname').innerText = mapname.toUpperCase();
-            
-            if (steamid && steamid !== "0") {
-                document.getElementById('steamid').innerText = "ID: " + steamid;
-            }
+            if (mapname) document.getElementById('mapname').innerText = mapname.toUpperCase();
+            if (steamid && steamid !== "0") document.getElementById('steamid').innerText = "ID: " + steamid;
             
             let music = document.getElementById('loading-music');
             music.volume = 0.2;
-            music.play().catch(e => console.log("Audio waiting for user interaction"));
+            music.play().catch(e => console.log("Audio waiting"));
         }
 
         function SetPlayerEntityInfo(name, steamid, communityid, avatarurl) {
-            if (name) {
-                document.getElementById('username').innerText = name;
+            updatePlayerUI(name, steamid, avatarurl);
+        }
+
+        function updatePlayerUI(name, steamid, avatarurl) {
+            if (name && name !== "undefined") {
+                document.getElementById('username').innerText = decodeURIComponent(name).toUpperCase();
                 document.getElementById('auth-tag').innerText = "SUBJECT_IDENTIFIED";
             }
-            if (steamid) {
+            if (steamid && steamid !== "0") {
                 document.getElementById('steamid').innerText = "ID: " + steamid;
             }
-
-            const img = document.getElementById('avatar');
-            
-            // Check if engine provides a valid Steam avatar URL
             if (avatarurl && avatarurl !== "" && avatarurl !== "noimage") {
+                const img = document.getElementById('avatar');
                 img.src = avatarurl;
-                
-                // Stop the scanning animation once the real Steam pfp loads
                 img.onload = function() {
                     img.classList.remove('scanning');
                     img.style.opacity = "1";
@@ -219,17 +222,24 @@
             }
         }
 
+        // --- INITIALIZATION ---
+        // Run immediately to catch URL parameters as a fallback
+        window.onload = function() {
+            var urlName = getQueryVariable("name"); // Some servers pass ?name=
+            var urlID = getQueryVariable("steamid");
+            if(urlName || urlID) {
+                updatePlayerUI(urlName, urlID, null);
+            }
+        };
+
         let totalFiles = 0;
         function SetFilesTotal(total) { totalFiles = total; }
-
         function SetFilesNeeded(needed) {
             let downloaded = Math.max(0, totalFiles - needed);
             let percentage = (totalFiles > 0) ? Math.floor((downloaded / totalFiles) * 100) : 0;
-            
             document.getElementById('progress-bar').style.width = percentage + "%";
             document.getElementById('percent-text').innerText = percentage + "%";
         }
-
         function SetStatusChanged(status) {
             document.getElementById('status-update').innerText = status.toUpperCase();
             let displayStatus = status.replace(/Downloading|Extracting/gi, "").trim();
