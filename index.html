@@ -58,12 +58,20 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        .avatar-wrapper { position: relative; width: 60px; height: 60px; }
+        .avatar-wrapper { position: relative; width: 60px; height: 60px; background: #000; }
         #avatar {
             width: 100%; height: 100%; 
             border: 1px solid var(--glass-border);
             object-fit: cover;
+            transition: opacity 0.5s ease;
         }
+        
+        /* Scanning effect for when PFP isn't loaded yet */
+        #avatar.scanning {
+            filter: brightness(0.5) sepia(1) hue-rotate(180deg);
+            animation: avatarPulse 1.5s infinite;
+        }
+
         .avatar-frame {
             position: absolute; top: -5px; left: -5px; width: 70px; height: 70px;
             border: 1px solid var(--main-blue); opacity: 0.5;
@@ -71,7 +79,7 @@
         }
 
         .user-meta { margin-left: 20px; }
-        .user-meta h2 { margin: 0; font-family: 'Orbitron'; font-size: 16px; color: white; letter-spacing: 2px; }
+        .user-meta h2 { margin: 0; font-family: 'Orbitron'; font-size: 16px; color: white; letter-spacing: 2px; text-transform: uppercase; }
         .user-meta small { color: var(--main-blue); font-weight: bold; font-size: 11px; display: block; margin-top: 4px; }
 
         /* --- Branding --- */
@@ -103,7 +111,7 @@
         }
         #progress-bar {
             width: 0%; height: 100%; background: var(--main-blue);
-            box-shadow: 0 0 15px var(--main-blue); transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 15px var(--main-blue); transition: width 0.4s ease;
         }
 
         /* --- Decorative Data (Sides) --- */
@@ -119,25 +127,29 @@
             50% { transform: scale(1.05); opacity: 0.2; }
             100% { transform: scale(1); opacity: 0.5; }
         }
+
+        @keyframes avatarPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
     </style>
 </head>
 <body>
     <div class="scanlines"></div>
     
     <div id="bg-container">
-        <div class="bg-slide active" style="background-image: url('https://imgur.com/a/NVqiwxB');"></div>
-        <div class="bg-slide" style="background-image: url('https://imgur.com/a/NVqiwxB');"></div>
+        <div class="bg-slide active" style="background-image: url('https://i.imgur.com/20D137F.jpg');"></div>
     </div>
 
     <div class="top-bar">
         <div class="avatar-wrapper">
             <div class="avatar-frame"></div>
-            <img id="avatar" src="https://i.imgur.com/6E7p7vC.png">
+            <img id="avatar" class="scanning" src="https://i.imgur.com/6E7p7vC.png">
         </div>
         <div class="user-meta">
-            <small>SUBJECT_IDENTIFIED</small>
-            <h2 id="username">CONNECTING...</h2>
-            <small id="steamid">STEAM_ID_PENDING</small>
+            <small id="auth-tag">ESTABLISHING LINK...</small>
+            <h2 id="username">SCANNING USER</h2>
+            <small id="steamid">ID: SEARCHING...</small>
         </div>
     </div>
 
@@ -167,34 +179,34 @@
     </audio>
 
     <script>
-        // Slideshow Logic
-        let slides = document.querySelectorAll('.bg-slide');
-        let current = 0;
-        if(slides.length > 1) {
-            setInterval(() => {
-                slides[current].classList.remove('active');
-                current = (current + 1) % slides.length;
-                slides[current].classList.add('active');
-            }, 8000);
-        }
-
-        // --- GMOD INTEGRATION ---
+        // --- GMOD HOOKS ---
 
         function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode, volume) {
             document.getElementById('mapname').innerText = mapname.toUpperCase();
-            document.getElementById('steamid').innerText = steamid;
+            
+            // Fail-safe: Update ID if engine provides it early
+            if (steamid && steamid !== "0") {
+                document.getElementById('steamid').innerText = "ID: " + steamid;
+            }
             
             let music = document.getElementById('loading-music');
             music.volume = 0.2;
-            music.play();
+            music.play().catch(e => console.log("Audio waiting for interaction"));
         }
 
-        // This is the CRITICAL hook for Name/PFP
+        // The Engine calls this once the handshake is successful
         function SetPlayerEntityInfo(name, steamid, communityid, avatarurl) {
-            document.getElementById('username').innerText = name.toUpperCase();
-            document.getElementById('steamid').innerText = steamid;
-            if (avatarurl && avatarurl !== "") {
-                document.getElementById('avatar').src = avatarurl;
+            if (name) {
+                document.getElementById('username').innerText = name;
+                document.getElementById('auth-tag').innerText = "SUBJECT_IDENTIFIED";
+            }
+            if (steamid) {
+                document.getElementById('steamid').innerText = "ID: " + steamid;
+            }
+            if (avatarurl && avatarurl !== "" && avatarurl !== "noimage") {
+                const img = document.getElementById('avatar');
+                img.src = avatarurl;
+                img.classList.remove('scanning'); // Removes the blink effect
             }
         }
 
@@ -211,8 +223,9 @@
 
         function SetStatusChanged(status) {
             document.getElementById('status-update').innerText = status.toUpperCase();
-            if(status.length > 30) status = status.substring(0, 30) + "...";
-            document.getElementById('tip-text').innerText = status.toUpperCase();
+            // Simplify status for the tip area
+            let displayStatus = status.replace(/Downloading|Extracting/gi, "").trim();
+            document.getElementById('tip-text').innerText = displayStatus || "PROCESSING...";
         }
     </script>
 </body>
